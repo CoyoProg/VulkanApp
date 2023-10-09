@@ -137,6 +137,13 @@
     <ClInclude Include="VulkanRenderer.h" />
     <ClInclude Include="VulkanUtilities.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="compileShaders.bat" />
+    <None Include="frag.spv" />
+    <None Include="shader.frag" />
+    <None Include="shader.vert" />
+    <None Include="vert.spv" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

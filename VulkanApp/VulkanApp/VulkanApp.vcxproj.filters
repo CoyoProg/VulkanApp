@@ -36,4 +36,21 @@
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shader.vert">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="shader.frag">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="compileShaders.bat">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="frag.spv">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+    <None Include="vert.spv">
+      <Filter>Fichiers sources\Shaders</Filter>
+    </None>
+  </ItemGroup>
 </Project>
