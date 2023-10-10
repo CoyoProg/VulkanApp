@@ -1,7 +1,9 @@
 #pragma once
-#include <vulkan/vulkan.hpp> 
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <stdexcept>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <stdexcept>
 #include <vector>
@@ -12,6 +14,13 @@ using std::set;
 using std::array;
 
 #include "VulkanUtilities.h"
+#include "VulkanMesh.h"
+
+struct ViewProjection
+{
+	glm::mat4 projection;
+	glm::mat4 view;
+};
 
 class VulkanRenderer
 {
@@ -30,13 +39,15 @@ public:
 	void draw();
 	void clean();
 
+	void updateModel(int modelId, glm::mat4 modelP);
+
 private:
 	GLFWwindow* window;
 	vk::Instance instance;
-	vk::Queue graphicsQueue;
+	vk::Queue graphicsQueue;			// Handles to queue (no value stored)
+	VkDebugUtilsMessengerEXT debugMessenger;
 
-	struct 
-	{
+	struct {
 		vk::PhysicalDevice physicalDevice;
 		vk::Device logicalDevice;
 	} mainDevice;
@@ -48,6 +59,10 @@ private:
 	vk::Extent2D swapchainExtent;
 	vector<SwapchainImage> swapchainImages;
 
+	vk::PipelineLayout pipelineLayout;
+	vk::RenderPass renderPass;
+	vk::Pipeline graphicsPipeline;
+
 	vector<vk::Framebuffer> swapchainFramebuffers;
 	vk::CommandPool graphicsCommandPool;
 	vector<vk::CommandBuffer> commandBuffers;
@@ -58,43 +73,50 @@ private:
 	int currentFrame = 0;
 	vector<vk::Fence> drawFences;
 
-	vk::PipelineLayout pipelineLayout;
-	vk::RenderPass renderPass;
-	vk::Pipeline graphicsPipeline;
+	vector<VulkanMesh> meshes;
 
-	//Debug
-	VkDebugUtilsMessengerEXT debugMessenger;
+	vk::DescriptorSetLayout descriptorSetLayout;
+	vector<vk::Buffer> vpUniformBuffer;
+	vector<vk::DeviceMemory> vpUniformBufferMemory;
+	vk::DescriptorPool descriptorPool;
+	vector<vk::DescriptorSet> descriptorSets;
+
+
+	ViewProjection viewProjection;
+	vk::DeviceSize minUniformBufferOffet;
+	size_t modelUniformAlignement;
+	Model* modelTransferSpace;
+	const int MAX_OBJECTS = 2;
+	vector<vk::Buffer> modelUniformBufferDynamic;
+	vector<vk::DeviceMemory> modelUniformBufferMemoryDynamic;
+
+	// Instance
+	void createInstance();
+	bool checkInstanceExtensionSupport(const vector<const char*>& checkExtensions);
+	bool checkValidationLayerSupport();
+	vector<const char*> getRequiredExtensions();
+
+	// Debug
 	void setupDebugMessenger();
-	VkResult createDebugUtilsMessengerEXT(
-		VkInstance instance,
-		const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-		const VkAllocationCallbacks* pAllocator,
-		VkDebugUtilsMessengerEXT* pDebugMessenger);
-	void destroyDebugUtilsMessengerEXT(VkInstance instance,
-		VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
-	void populateDebugMessengerCreateInfo(
-		VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+	VkResult createDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+	void destroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator);
 
-
-	//Devices
+	// Devices
 	void getPhysicalDevice();
 	bool checkDeviceSuitable(vk::PhysicalDevice device);
 	QueueFamilyIndices getQueueFamilies(vk::PhysicalDevice device);
 	void createLogicalDevice();
 
-	//Surface & Swapchain
+	// Surface and swapchain
 	vk::SurfaceKHR createSurface();
-	void createSwapchain();
 	bool checkDeviceExtensionSupport(vk::PhysicalDevice device);
 	SwapchainDetails getSwapchainDetails(vk::PhysicalDevice device);
-	vk::SurfaceFormatKHR chooseBestSurfaceFormat(
-		const vector<vk::SurfaceFormatKHR>& formats);
-	vk::PresentModeKHR chooseBestPresentationMode(
-		const vector<vk::PresentModeKHR>& presentationModes);
-	vk::Extent2D chooseSwapExtent(
-		const vk::SurfaceCapabilitiesKHR& surfaceCapabilities);
-	vk::ImageView createImageView(
-		vk::Image image, vk::Format format, vk::ImageAspectFlagBits aspectFlags);
+	void createSwapchain();
+	vk::SurfaceFormatKHR chooseBestSurfaceFormat(const vector<vk::SurfaceFormatKHR>& formats);
+	vk::PresentModeKHR chooseBestPresentationMode(const vector<vk::PresentModeKHR>& presentationModes);
+	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& surfaceCapabilities);
+	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlagBits aspectFlags);
 
 	// Graphics pipeline
 	void createGraphicsPipeline();
@@ -107,11 +129,16 @@ private:
 	void createGraphicsCommandBuffers();
 	void recordCommands();
 
-	//Instance
-	void createInstance();
-	bool checkInstanceExtensionSupport(const vector<const char*>& checkExtensions);
-	bool checkValidationLayerSupport();
-	vector<const char*> getRequiredExtensions();
+	// Descriptor sets
+	void createDescriptorSetLayout();
+	void createUniformBuffers();
+	void createDescriptorPool();
+	void createDescriptorSets();
+	void updateUniformBuffer(uint32_t imageIndex);
+	void updateUniformBuffers(uint32_t imageIndex);
+
+	// Data alignment and dynamic buffers
+	void allocateDynamicBufferTransferSpace();
 
 	// Draw
 	void createSynchronisation();

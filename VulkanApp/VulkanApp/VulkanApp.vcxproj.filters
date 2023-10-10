@@ -16,9 +16,6 @@
     <Filter Include="Fichiers sources\Shaders">
       <UniqueIdentifier>{a8650967-8822-48ca-8e8d-d48e32785095}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Fichiers d%27en-tête\Shaders">
-      <UniqueIdentifier>{05f76f4d-6660-4701-bbb6-07943e039a91}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -27,12 +24,18 @@
     <ClCompile Include="VulkanRenderer.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanMesh.cpp">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanRenderer.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
     <ClInclude Include="VulkanUtilities.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanMesh.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>

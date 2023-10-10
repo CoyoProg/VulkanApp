@@ -1,7 +1,5 @@
 #version 450
-
-// Connects to the output of vertex shader.
-// Interpolated color from vertex shader.
+// Input colors from vertex shader
 layout(location = 0) in vec3 fragColor;
 
 // Final output color, must have location
