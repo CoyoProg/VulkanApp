@@ -16,6 +16,9 @@
     <Filter Include="Fichiers sources\Shaders">
       <UniqueIdentifier>{a8650967-8822-48ca-8e8d-d48e32785095}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Fichiers sources\Textures">
+      <UniqueIdentifier>{5172b07d-e40d-4a01-a0cb-77ef12d69100}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -38,6 +41,9 @@
     <ClInclude Include="VulkanMesh.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shader.vert">
@@ -55,5 +61,13 @@
     <None Include="vert.spv">
       <Filter>Fichiers sources\Shaders</Filter>
     </None>
+    <None Include="glfw3.dll">
+      <Filter>Fichiers sources</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\cat.jpg">
+      <Filter>Fichiers sources\Textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

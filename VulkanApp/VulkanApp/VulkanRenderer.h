@@ -2,6 +2,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "stb_image.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -40,6 +42,7 @@ public:
 	void clean();
 
 	void updateModel(int modelId, glm::mat4 modelP);
+	stbi_uc* loadTextureFile(const string& filename, int* width, int* height, vk::DeviceSize* imageSize);
 
 private:
 	GLFWwindow* window;
@@ -90,6 +93,20 @@ private:
 	vector<vk::Buffer> modelUniformBufferDynamic;
 	vector<vk::DeviceMemory> modelUniformBufferMemoryDynamic;
 
+	vk::PushConstantRange pushConstantRange;
+
+	vk::Image depthBufferImage;
+	vk::DeviceMemory depthBufferImageMemory;
+	vk::ImageView depthBufferImageView;
+
+	vector<vk::Image> textureImages;
+	vector<vk::ImageView> textureImageViews;
+	vector<vk::DeviceMemory> textureImageMemory;
+	vk::Sampler textureSampler;
+	vk::DescriptorPool samplerDescriptorPool;
+	vk::DescriptorSetLayout samplerDescriptorSetLayout;
+	vector<vk::DescriptorSet> samplerDescriptorSets;
+
 	// Instance
 	void createInstance();
 	bool checkInstanceExtensionSupport(const vector<const char*>& checkExtensions);
@@ -127,19 +144,33 @@ private:
 	void createFramebuffers();
 	void createGraphicsCommandPool();
 	void createGraphicsCommandBuffers();
-	void recordCommands();
+	void recordCommands(uint32_t currentImage);
 
 	// Descriptor sets
 	void createDescriptorSetLayout();
 	void createUniformBuffers();
 	void createDescriptorPool();
 	void createDescriptorSets();
-	void updateUniformBuffer(uint32_t imageIndex);
 	void updateUniformBuffers(uint32_t imageIndex);
 
 	// Data alignment and dynamic buffers
 	void allocateDynamicBufferTransferSpace();
 
+	// Push constants
+	void createPushConstantRange();
+
+	// Depth
+	void createDepthBufferImage();
+	vk::Image createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling,
+		vk::ImageUsageFlags useFlags, vk::MemoryPropertyFlags propFlags, vk::DeviceMemory* imageMemory);
+	vk::Format chooseSupportedFormat(const vector<vk::Format>& formats, vk::ImageTiling tiling, vk::FormatFeatureFlags featureFlags);
+
 	// Draw
 	void createSynchronisation();
+
+	// Textures
+	int createTexture(const string& filename);
+	int createTextureImage(const string& filename);
+	void createTextureSampler();
+	int createTextureDescriptor(vk::ImageView textureImageView);
 };

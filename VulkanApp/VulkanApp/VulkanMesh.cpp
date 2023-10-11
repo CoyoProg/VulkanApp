@@ -2,14 +2,13 @@
 
 VulkanMesh::VulkanMesh(vk::PhysicalDevice physicalDeviceP, vk::Device deviceP,
 	vk::Queue transferQueue, vk::CommandPool transferCommandPool,
-	vector<Vertex>* vertices, vector<uint32_t>* indices)
+	vector<Vertex>* vertices, vector<uint32_t>* indices, int texIdP)
 	:
-	vertexCount(vertices->size()), indexCount(indices->size()),
-	physicalDevice(physicalDeviceP), device(deviceP)
+	vertexCount{ vertices->size() }, indexCount{ indices->size() },
+	physicalDevice{ physicalDeviceP }, device{ deviceP }, texId{ texIdP }
 {
 	createVertexBuffer(transferQueue, transferCommandPool, vertices);
 	createIndexBuffer(transferQueue, transferCommandPool, indices);
-
 	model.model = glm::mat4(1.0f);
 }
 
@@ -27,6 +26,7 @@ size_t VulkanMesh::getIndexCount()
 {
 	return indexCount;
 }
+
 vk::Buffer VulkanMesh::getIndexBuffer()
 {
 	return indexBuffer;
@@ -40,8 +40,7 @@ void VulkanMesh::destroyBuffers()
 	device.freeMemory(indexBufferMemory, nullptr);
 }
 
-void VulkanMesh::createVertexBuffer(vk::Queue transferQueue,
-	vk::CommandPool transferCommandPool, vector<Vertex>* vertices)
+void VulkanMesh::createVertexBuffer(vk::Queue transferQueue, vk::CommandPool transferCommandPool, vector<Vertex>* vertices)
 {
 	vk::DeviceSize bufferSize = sizeof(Vertex) * vertices->size();
 
@@ -81,6 +80,7 @@ void VulkanMesh::createIndexBuffer(vk::Queue transferQueue,
 	vk::CommandPool transferCommandPool, vector<uint32_t>* indices)
 {
 	vk::DeviceSize bufferSize = sizeof(uint32_t) * indices->size();
+
 	vk::Buffer stagingBuffer;
 	vk::DeviceMemory stagingBufferMemory;
 	createBuffer(physicalDevice, device, bufferSize, vk::BufferUsageFlagBits::eTransferSrc,
@@ -91,15 +91,16 @@ void VulkanMesh::createIndexBuffer(vk::Queue transferQueue,
 	device.mapMemory(stagingBufferMemory, {}, bufferSize, {}, &data);
 	memcpy(data, indices->data(), static_cast<size_t>(bufferSize));
 	device.unmapMemory(stagingBufferMemory);
-	// This time with vk::BufferUsageFlagBits::eIndexBuffer,
-	// &indexBuffer and &indexBufferMemory
+
+	// This time with vk::BufferUsageFlagBits::eIndexBuffer, &indexBuffer and &indexBufferMemory
 	createBuffer(physicalDevice, device, bufferSize,
 		vk::BufferUsageFlagBits::eTransferDst | vk::BufferUsageFlagBits::eIndexBuffer,
 		vk::MemoryPropertyFlagBits::eDeviceLocal,
 		&indexBuffer, &indexBufferMemory);
+
 	// Copy to indexBuffer
-	copyBuffer(device, transferQueue, transferCommandPool,
-		stagingBuffer, indexBuffer, bufferSize);
+	copyBuffer(device, transferQueue, transferCommandPool, stagingBuffer, indexBuffer, bufferSize);
+
 	device.destroyBuffer(stagingBuffer);
 	device.freeMemory(stagingBufferMemory);
 }

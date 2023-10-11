@@ -7,8 +7,7 @@ using std::vector;
 
 #include "VulkanUtilities.h"
 
-struct Model 
-{
+struct Model {
 	glm::mat4 model;
 };
 
@@ -17,7 +16,7 @@ class VulkanMesh
 public:
 	VulkanMesh(vk::PhysicalDevice physicalDeviceP, vk::Device deviceP,
 		vk::Queue transferQueue, vk::CommandPool transferCommandPool,
-		vector<Vertex>* vertices, vector<uint32_t>* indices);
+		vector<Vertex>* vertices, vector<uint32_t>* indices, int texIdP);
 	VulkanMesh() = default;
 	~VulkanMesh() = default;
 
@@ -28,14 +27,15 @@ public:
 
 	Model getModel() const { return model; }
 	void setModel(const glm::mat4& modelP) { model.model = modelP; }
+	int getTexId() const { return texId; }
 
 	void destroyBuffers();
 
 private:
 	size_t vertexCount{ 0 };
 	size_t indexCount{ 0 };
-
 	Model model;
+	int texId;
 
 	vk::Buffer vertexBuffer;
 	vk::PhysicalDevice physicalDevice;

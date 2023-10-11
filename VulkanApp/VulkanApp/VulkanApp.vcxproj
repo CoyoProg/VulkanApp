@@ -135,6 +135,7 @@
     <ClCompile Include="VulkanRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="stb_image.h" />
     <ClInclude Include="VulkanMesh.h" />
     <ClInclude Include="VulkanRenderer.h" />
     <ClInclude Include="VulkanUtilities.h" />
@@ -142,9 +143,13 @@
   <ItemGroup>
     <None Include="compileShaders.bat" />
     <None Include="frag.spv" />
+    <None Include="glfw3.dll" />
     <None Include="shader.frag" />
     <None Include="shader.vert" />
     <None Include="vert.spv" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\cat.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
