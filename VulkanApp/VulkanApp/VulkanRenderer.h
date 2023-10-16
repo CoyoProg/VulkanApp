@@ -6,6 +6,9 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include <stdexcept>
 #include <vector>
@@ -17,6 +20,7 @@ using std::array;
 
 #include "VulkanUtilities.h"
 #include "VulkanMesh.h"
+#include "VulkanMeshModel.h"
 
 struct ViewProjection
 {
@@ -40,6 +44,9 @@ public:
 	int init(GLFWwindow* windowP);
 	void draw();
 	void clean();
+
+	// Mesh
+	int createMeshModel(const string& filename);
 
 	void updateModel(int modelId, glm::mat4 modelP);
 	stbi_uc* loadTextureFile(const string& filename, int* width, int* height, vk::DeviceSize* imageSize);
@@ -89,7 +96,7 @@ private:
 	vk::DeviceSize minUniformBufferOffet;
 	size_t modelUniformAlignement;
 	Model* modelTransferSpace;
-	const int MAX_OBJECTS = 2;
+	const int MAX_OBJECTS = 20;
 	vector<vk::Buffer> modelUniformBufferDynamic;
 	vector<vk::DeviceMemory> modelUniformBufferMemoryDynamic;
 
@@ -106,6 +113,15 @@ private:
 	vk::DescriptorPool samplerDescriptorPool;
 	vk::DescriptorSetLayout samplerDescriptorSetLayout;
 	vector<vk::DescriptorSet> samplerDescriptorSets;
+
+	vector<VulkanMeshModel> meshModels;
+
+	vk::SampleCountFlagBits msaaSamples{ vk::SampleCountFlagBits::e1 };
+	vk::Image colorImage;
+	vk::DeviceMemory colorImageMemory;
+	vk::ImageView colorImageView;
+
+	void createColorBufferImage();
 
 	// Instance
 	void createInstance();
@@ -133,7 +149,8 @@ private:
 	vk::SurfaceFormatKHR chooseBestSurfaceFormat(const vector<vk::SurfaceFormatKHR>& formats);
 	vk::PresentModeKHR chooseBestPresentationMode(const vector<vk::PresentModeKHR>& presentationModes);
 	vk::Extent2D chooseSwapExtent(const vk::SurfaceCapabilitiesKHR& surfaceCapabilities);
-	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlagBits aspectFlags);
+	vk::ImageView createImageView(vk::Image image, vk::Format format, vk::ImageAspectFlagBits aspectFlags, uint32_t mipLevels);
+	vk::Format chooseSupportedFormat(const vector<vk::Format>& formats, vk::ImageTiling tiling, vk::FormatFeatureFlags featureFlags);
 
 	// Graphics pipeline
 	void createGraphicsPipeline();
@@ -161,16 +178,16 @@ private:
 
 	// Depth
 	void createDepthBufferImage();
-	vk::Image createImage(uint32_t width, uint32_t height, vk::Format format, vk::ImageTiling tiling,
+	vk::Image createImage(uint32_t width, uint32_t height, uint32_t mipLevels,
+		vk::SampleCountFlagBits numSamples, vk::Format format, vk::ImageTiling tiling,
 		vk::ImageUsageFlags useFlags, vk::MemoryPropertyFlags propFlags, vk::DeviceMemory* imageMemory);
-	vk::Format chooseSupportedFormat(const vector<vk::Format>& formats, vk::ImageTiling tiling, vk::FormatFeatureFlags featureFlags);
 
 	// Draw
 	void createSynchronisation();
 
 	// Textures
 	int createTexture(const string& filename);
-	int createTextureImage(const string& filename);
+	int createTextureImage(const string& filename, uint32_t& mipLevels);
 	void createTextureSampler();
 	int createTextureDescriptor(vk::ImageView textureImageView);
 };
